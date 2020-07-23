@@ -33,14 +33,14 @@ def main():
                x = lineList[1]
                y = lineList[2]
                pol = lineList[3]
-               OF_scale = lineList[6]
-               OF_x = ((lineList[4]) >> OF_scale)
-               # OF_x = -OF_x + 3
-               OF_y = ((lineList[5]) >> OF_scale)
-               # OF_y = -OF_y + 3
+               OFRetValid = lineList[6]
+               OF_x = ((lineList[4]))
+               OF_x = OF_x + 127   # Make sure it is positive so we can remove sign bit
+               OF_y = ((lineList[5]))
+               OF_y = OF_y + 127    # Make sure it is positive so we can remove sign bit
                rotateFlg = lineList[7]
                SFASTCorner = lineList[8]
-               OF_ret = (SFASTCorner << 10) + (rotateFlg << 9) + ( (OF_y & 0xf) << 4 ) + (OF_x & 0xf)
+               OF_ret = (rotateFlg << 10) + ( (OF_y & 0xf) << 5 ) + (OF_x & 0x1f)
 
                address = ((y << POLARITY_Y_ADDR_SHIFT) + (x << POLARITY_X_ADDR_SHIFT)+ (pol << POLARITY_SHIFT) + OF_ret)
                addr_arr = address.to_bytes(4, 'big', signed=False)
