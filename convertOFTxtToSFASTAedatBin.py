@@ -11,9 +11,6 @@ POLARITY_Y_ADDR_MASK = (511 << POLARITY_Y_ADDR_SHIFT)
 POLARITY_X_ADDR_SHIFT = 12
 POLARITY_X_ADDR_MASK = (1023 << POLARITY_X_ADDR_SHIFT)
 
-SEARCH_DISTANCE = 3
-MAX_SEARCH_DIST_RADIUS = (4 + 2 + 1) * SEARCH_DISTANCE
-
 def main():
    filepath = sys.argv[1]
 
@@ -38,20 +35,23 @@ def main():
                pol = lineList[3]
                OFRetValid = lineList[6]
 
+               # Make sure it is positive so we can remove sign bit and map -15 to 0, 0 to 15, 15 to 30 and 16 to 31.
+               # In this case, if we use 5bits to represent the OF, then we can use 0x1f (31) to represent invalid result.
                OF_x = ((lineList[4]))
-               OF_x = OF_x + MAX_SEARCH_DIST_RADIUS
+               if OFRetValid == 0:
+                   OF_x = 16
+               OF_x = OF_x + 128 + 15
 
                OF_y = ((lineList[5]))
-               OF_y = OF_y + MAX_SEARCH_DIST_RADIUS
+               if OFRetValid == 0:
+                   OF_y = 16
+               # Make sure it is positive so we can remove sign bit and map -15 to 0, 0 to 15, 15 to 30 and 16 to 31.
+               # In this case, if we use 5bits to represent the OF, then we can use 0x1f (31) to represent invalid result.
+               OF_y = OF_y + 128 + 15
 
                rotateFlg = lineList[7]
-
-               OF_ret = OF_x * (2 * MAX_SEARCH_DIST_RADIUS + 1) + OF_y
-               if OFRetValid == 0:
-                   OF_ret = 0x7ff
-               if rotateFlg == 1:
-                   OF_ret = 0x7fe
                SFASTCorner = lineList[8]
+               OF_ret = SFASTCorner
 
                address = ((y << POLARITY_Y_ADDR_SHIFT) + (x << POLARITY_X_ADDR_SHIFT)+ (pol << POLARITY_SHIFT) + OF_ret)
                addr_arr = address.to_bytes(4, 'big', signed=False)
